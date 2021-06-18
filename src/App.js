@@ -1,14 +1,21 @@
 import React from 'react';
-//import Home from './pages/Home'
-import Repositories from './pages/Repositories'
+import Home from './pages/Home';
+import Repositories from './pages/Repositories';
+import {BrowserRouter,Switch,Route} from 'react-router-dom';
 
-//<Home />
+
 function App() {
   return (
-    <div>
-    
-    <Repositories/>
-    </div>
+    <BrowserRouter>
+      <Switch>
+        <Route path="/repos/:login">
+          <Repositories/>
+        </Route>
+        <Route path="/">
+          <Home />
+        </Route>
+      </Switch>
+    </BrowserRouter>
   );
 }
 

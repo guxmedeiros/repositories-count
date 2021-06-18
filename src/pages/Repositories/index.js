@@ -1,27 +1,58 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../../components/Header';
 import InputSearch from '../../components/InputSearch';
-import Cards from '../../components/Cards'
+import ListCardsRepos from '../../components/ListCardsRepos';
+import {useParams} from 'react-router-dom';
+import api from '../../services/axios';
 import './style.css';
 
-import infoRepos from '../../Mock/infoRepos.json'
-
 const Repositories = () => {
+
+    const {login} = useParams();
     const [data, setData] = useState([]);
+    const [cardsFiltrados, setCardsFiltrados] = useState([]);
     const [texto, setTexto] = useState('');
+    const [error, setError] = useState('');
 
     useEffect(() =>{
-        setData(infoRepos)
-    },[])
+        const loadData = async () => {
+            api.get(`users/${login}/repos`)
+                .then(response => setData(response.data))
+                .catch( _ => setError("Ops... Nao foi possivel carregar os repositorios!"))
+        }
+        loadData();
+    },[login])
+
+    useEffect(() => {
+        const filtrarCards = (valorBusca) => {
+            const filtradosLinguagem = data.filter(d => d.language ?
+                (d.language.toLowerCase() === valorBusca.toLowerCase()) === true : null)
+            
+                const filtradosNome = data.filter(d  => 
+                    d.name.toLowerCase()
+                        .includes(valorBusca.toLowerCase()) === true)  
+            if(filtradosLinguagem.length > 0) {
+                setCardsFiltrados(filtradosLinguagem);
+                return;
+            }            
+            setCardsFiltrados(filtradosNome);
+        }
+        filtrarCards(texto);
+    }, [texto, data])
 
     return (
-        <div className="CardArea">
+        <div>
             <Header>
                 Repositorios
             </Header>
             <InputSearch texto={texto} setTexto={setTexto}/>
             <div className= "CardArea">
-                    <Cards data={data}/>
+                    {cardsFiltrados.length === 0 ?
+                        <ListCardsRepos data={data}/>
+                        :
+                        <ListCardsRepos data={cardsFiltrados}/>
+                    }
+                    <h3>{error}</h3>
             </div>
         </div>
     )
